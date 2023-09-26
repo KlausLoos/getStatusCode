@@ -33,6 +33,8 @@ function getStatusCode(url);
 ### Example
 `=getStatusCode("http://example.com")` might return 301 - https://www.example.com.
 
+![Example in use](./getStatusCode.png)
+
 ### Limitations
 The script uses Google Apps Script's UrlFetchApp service, which has its own quotas and limitations.
 
