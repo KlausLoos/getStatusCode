@@ -21,19 +21,28 @@ function getStatusCode(url) {
   };
   
   var url_trimmed = url.trim();
-  var response = UrlFetchApp.fetch(url_trimmed, options);
-  var status = response.getResponseCode();
+  var finalUrl = url_trimmed;
+  var originalStatus = 0;
+  var status = 0;
   
-  var result = status;
-  // If status is 301 or 302, follow the redirect and get the final URL
-  if (status === 301 || status === 302) {
-    options.followRedirects = true;
-    response = UrlFetchApp.fetch(url_trimmed, options);
-    var finalUrl = response.getHeaders().Location || url_trimmed;
-    result = status + " - " + finalUrl;
-  }
+  // Manually follow redirects
+  do {
+    var response = UrlFetchApp.fetch(finalUrl, options);
+    status = response.getResponseCode();
+    
+    // Store the original status code if it's a redirect
+    if ((status === 301 || status === 302) && originalStatus === 0) {
+      originalStatus = status;
+    }
+    
+    if (status === 301 || status === 302) {
+      finalUrl = response.getHeaders()['Location'];
+    }
+  } while (status === 301 || status === 302);
   
-  // Store the result in the cache for 6 hours
+  var result = (originalStatus || status) + " - " + finalUrl;
+  
+  // Store the result in the cache for 1 min
   cache.put(url, result.toString(), 21600);
   
   return result;
